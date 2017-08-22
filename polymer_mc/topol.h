@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include "parameter.h"
 
+struct Boundary_t;
+typedef struct Boundary_t Boundary;
+
 typedef struct {
 	int32_t i0, i1;
 } pair;
@@ -25,14 +28,15 @@ typedef struct topol_t topol;
 #define NUM_NEIGHBOR_TRIPLE 3
 #endif
 
-typedef struct {
+typedef struct ptclid2topol_t {
 	int32_t num_pair;
 	pair pair[NUM_NEIGHBOR_PAIR];
 	int32_t num_triple;
 	triple triple[NUM_NEIGHBOR_TRIPLE];
 } ptclid2topol;
 
-topol* newTopolChain(const Parameter* param);
+topol* newTopolChain(const Parameter* param, const Boundary* bound);
+topol* newTopolMesh(const Parameter* param, const Boundary* bound);
 void deleteTopol(topol* top);
 
 ptclid2topol* newId2Topol(const topol* top, const Parameter* param);

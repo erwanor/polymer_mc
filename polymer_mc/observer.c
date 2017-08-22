@@ -5,10 +5,11 @@
 #include <stdbool.h>
 #include <math.h>
 
-#include "vector3.h"
-#include "tensor3.h"
-#include "evolver.h"
 #include "utils.h"
+#include "file_utils.h"
+#include "interactions.h"
+#include "evolver.h"
+#include "topol.h"
 
 typedef enum {
 	ENERGY = 0,
@@ -27,14 +28,14 @@ struct Observer_t {
 };
 
 static const char* getFileNameFromObserverType(ObserverType type);
-static void observeEnergy(Observer* self, const int32_t mc_steps, const System* system, const Parameter* param);
-static void observePressure(Observer* self, const int32_t mc_steps, const System* system, const Parameter* param);
-static void observeRg(Observer* self, const int32_t mcsteps, const System* system, const Parameter* param);
-static void observeEnd2End(Observer* self, const int32_t mcsteps, const System* system, const Parameter* param);
+static void observeEnergy(Observer* self, const int32_t mc_steps, const System* system, const Boundary* bound, const Parameter* param);
+static void observePressure(Observer* self, const int32_t mc_steps, const System* system, const Boundary* bound, const Parameter* param);
+static void observeRg(Observer* self, const int32_t mcsteps, const System* system, const Boundary* bound, const Parameter* param);
+static void observeEnd2End(Observer* self, const int32_t mcsteps, const System* system, const Boundary* bound, const Parameter* param);
 static void observeAcceptRatio(Observer* self, const int32_t mcsteps, const System* system, const Parameter* param);
 static void writeXYZHeader(FILE* fp, const int32_t num_ptcl, const int32_t mcsteps);
 static void observeTraject(Observer* self, const int32_t mcsteps, const System* system, const Parameter* param);
-static void observeBondLenDist(Observer* self, const int32_t mcsteps, const System* system, const Parameter* param);
+static void observeBondLenDist(Observer* self, const System* system, const Boundary* bound, const Parameter* param);
 
 static const char* getFileNameFromObserverType(ObserverType type)
 {
@@ -83,21 +84,23 @@ void deleteObserver(Observer* self)
 void observeMicroVars(Observer* self,
 	const int32_t mc_steps,
 	const System* system,
+	const Boundary* bound,
 	const Parameter* param)
 {
 	observeTraject(self, mc_steps, system, param);
-	observeBondLenDist(self, mc_steps, system, param);
+	observeBondLenDist(self, system, bound, param);
 }
 
 void observeMacroVars(Observer* self,
 	const int32_t mc_steps,
 	const System* system,
+	const Boundary* bound,
 	const Parameter* param)
 {
-	observeEnergy(self, mc_steps, system, param);
-	observePressure(self, mc_steps, system, param);
-	observeRg(self, mc_steps, system, param);
-	observeEnd2End(self, mc_steps, system, param);
+	observeEnergy(self, mc_steps, system, bound, param);
+	observePressure(self, mc_steps, system, bound, param);
+	observeRg(self, mc_steps, system, bound, param);
+	observeEnd2End(self, mc_steps, system, bound, param);
 	observeAcceptRatio(self, mc_steps, system, param);
 }
 
@@ -113,6 +116,7 @@ void observeMacroVars(Observer* self,
 static void observeEnergy(Observer* self,
 	const int32_t mc_steps,
 	const System* system,
+	const Boundary* bound,
 	const Parameter* param)
 {
 	static bool is_first_call = true;
@@ -126,7 +130,7 @@ static void observeEnergy(Observer* self,
 
 	double etot_bond = 0.0;
 	for (int32_t b = 0; b < num_bonds; b++) {
-		etot_bond += calcBondEnergy(&pos[bond_top[b].i0], &pos[bond_top[b].i1], cf_b);
+		etot_bond += calcBondEnergy(&pos[bond_top[b].i0], &pos[bond_top[b].i1], cf_b, bound);
 	}
 
 	double etot_angle = 0.0;
@@ -134,60 +138,18 @@ static void observeEnergy(Observer* self,
 		etot_angle += calcAngleEnergy(&pos[angle_top[a].i0],
 			&pos[angle_top[a].i1],
 			&pos[angle_top[a].i2],
-			cf_a);
+			cf_a,
+			bound);
 	}
 
 	const double etot = etot_bond + etot_angle;
 	fprintf(self->fps[ENERGY], "%d %f %f %f\n", mc_steps, etot_bond, etot_angle, etot);
 }
 
-static dtensor3 calcBondVirial(const dvec* pos0,
-	const dvec* pos1,
-	const double k)
-{
-	const dvec dr01 = sub_dvec_new(pos1, pos0);
-	const dvec dF01 = mul_scalar_new(&dr01, k);
-	return dtensor3_dot(&dF01, &dr01);
-}
-
-static dtensor3 calcAngleVirial(const dvec* pos0,
-	const dvec* pos1,
-	const dvec* pos2,
-	const double k)
-{
-	const dvec dr10 = sub_dvec_new(pos0, pos1); // 1 -> 0
-	const dvec dr12 = sub_dvec_new(pos2, pos1); // 1 -> 2
-
-	const double dr10_norm2 = norm2(&dr10);
-	const double dr12_norm2 = norm2(&dr12);
-
-	const double dr10_norm = sqrt(dr10_norm2);
-	const double dr12_norm = sqrt(dr12_norm2);
-
-	double cs = dvec_dot(&dr10, &dr12) / (dr10_norm * dr12_norm);
-	if (cs > 1.0) cs = 1.0;
-	if (cs < -1.0) cs = -1.0;
-
-    const double a11 = k * cs / dr10_norm2;
-    const double a12 = -k / (dr10_norm * dr12_norm);
-    const double a22 = k * cs / dr12_norm2;
-
-	const dvec dF0_0 = mul_scalar_new(&dr10, a11);
-	const dvec dF0_1 = mul_scalar_new(&dr12, a12);
-	const dvec dF0 = add_dvec_new(&dF0_0, &dF0_1);
-	const dtensor3 dF0_dr10 = dtensor3_dot(&dF0, &dr10);
-
-	const dvec dF1_0 = mul_scalar_new(&dr12, a22);
-	const dvec dF1_1 = mul_scalar_new(&dr10, a12);
-	const dvec dF1 = add_dvec_new(&dF1_0, &dF1_1);
-	const dtensor3 dF1_dr12 = dtensor3_dot(&dF1, &dr12);
-
-	return dtensor3_add_new(&dF0_dr10, &dF1_dr12);
-}
-
 static void observePressure(Observer* self,
 	const int32_t mcsteps,
 	const System* system,
+	const Boundary* bound,
 	const Parameter* param)
 {
 	static bool is_first_call = true;
@@ -201,14 +163,15 @@ static void observePressure(Observer* self,
 
 	dtensor3 vir_tot = {0.0};
 	for (int32_t b = 0; b < num_bonds; b++) {
-		const dtensor3 dvir = calcBondVirial(&pos[bond_top[b].i0], &pos[bond_top[b].i1], cf_b);
+		const dtensor3 dvir = calcBondVirial(&pos[bond_top[b].i0], &pos[bond_top[b].i1], cf_b, bound);
 		dtensor3_add(&vir_tot, &dvir);
 	}
 	for (int32_t a = 0; a < num_angles; a++) {
 		const dtensor3 dvir = calcAngleVirial(&pos[angle_top[a].i0],
 			&pos[angle_top[a].i1],
 			&pos[angle_top[a].i2],
-			cf_a);
+			cf_a,
+			bound);
 		dtensor3_add(&vir_tot, &dvir);
 	}
 
@@ -222,6 +185,7 @@ static void observePressure(Observer* self,
 static void observeRg(Observer* self,
 	const int32_t mcsteps,
 	const System* system,
+	const Boundary* bound,
 	const Parameter* param)
 {
 	const dvec* pos = getPos(system);
@@ -235,7 +199,7 @@ static void observeRg(Observer* self,
 
 	double rg = 0.0;
 	for (int32_t i = 0; i < num_ptcl; i++) {
-		rg += distance2(&cmpos, &pos[i]);
+		rg += distance2(&cmpos, &pos[i], bound);
 	}
 	rg /= num_ptcl;
 	rg = sqrt(rg);
@@ -246,11 +210,12 @@ static void observeRg(Observer* self,
 static void observeEnd2End(Observer* self,
 	const int32_t mcsteps,
 	const System* system,
+	const Boundary* bound,
 	const Parameter* param)
 {
 	const dvec* pos = getPos(system);
 	const int32_t num_ptcl = getNumPtcl(param);
-	const double e2e = distance(&pos[0], &pos[num_ptcl - 1]);
+	const double e2e = distance(&pos[0], &pos[num_ptcl - 1], bound);
 	fprintf(self->fps[END_TO_END], "%d %f\n", mcsteps, e2e);
 }
 
@@ -286,15 +251,14 @@ static void observeTraject(Observer* self,
 }
 
 static void observeBondLenDist(Observer* self,
-	const int32_t mcsteps,
 	const System* system,
+	const Boundary* bound,
 	const Parameter* param)
 {
-	UNUSED_PARAMETER(mcsteps);
 	const dvec* pos = getPos(system);
 	const int32_t num_ptcl = getNumPtcl(param);
 	for (int32_t i = 1; i < num_ptcl; i++) {
 		fprintf(self->fps[BOND_LEN_DIST],
-			"%.15g\n", distance(&pos[i], &pos[i-1]));
+			"%.15g\n", distance(&pos[i], &pos[i-1], bound));
 	}
 }

@@ -128,9 +128,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="boundary.c" />
     <ClCompile Include="config_maker.c" />
+    <ClCompile Include="err_msgs.c" />
     <ClCompile Include="evolver.c" />
+    <ClCompile Include="file_utils.c" />
+    <ClCompile Include="interactions.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="math_utils.c" />
     <ClCompile Include="mt_rand.c" />
     <ClCompile Include="observer.c" />
     <ClCompile Include="parameter.c" />
@@ -142,8 +147,13 @@
     <ClCompile Include="vector3.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="boundary.h" />
     <ClInclude Include="config_maker.h" />
+    <ClInclude Include="err_msgs.h" />
     <ClInclude Include="evolver.h" />
+    <ClInclude Include="file_utils.h" />
+    <ClInclude Include="interactions.h" />
+    <ClInclude Include="math_utils.h" />
     <ClInclude Include="mt_rand.h" />
     <ClInclude Include="observer.h" />
     <ClInclude Include="parameter.h" />
@@ -152,6 +162,7 @@
     <ClInclude Include="tensor3.h" />
     <ClInclude Include="topol.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="vector.h" />
     <ClInclude Include="vector3.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

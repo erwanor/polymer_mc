@@ -1,7 +1,14 @@
 #include "topol.h"
 
-#include "string_c.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
 #include "utils.h"
+#include "file_utils.h"
+#include "math_utils.h"
+#include "string_c.h"
+#include "boundary.h"
 
 struct topol_t {
 	int32_t num_bonds;
@@ -15,37 +22,118 @@ static void copyTriple(triple* dst, const triple* src);
 static void registerBondTopol(ptclid2topol* id2tops, const pair* bond_top);
 static void registerAngleTopol(ptclid2topol* id2tops, const triple* angle_top);
 
-topol* newTopolChain(const Parameter* param)
+topol* newTopolChain(const Parameter* param,
+	const Boundary* bound)
 {
 	const int32_t n = getNumPtcl(param);
 	topol* top = (topol*)xmalloc(sizeof(topol));
 
 	// bond topology
-	const int32_t num_bonds = n - 1;
+	int32_t num_bonds = n - 1;
+	if (getBoundaryType(bound) == PERIODIC) num_bonds += 1;
 	top->bond_top = (pair*)xmalloc(num_bonds * sizeof(pair));
-	for (int32_t i = 0; i < num_bonds; i++) {
+	for (int32_t i = 0; i < n - 1; i++) {
 		top->bond_top[i].i0 = i + 0;
 		top->bond_top[i].i1 = i + 1;
+	}
+	if (getBoundaryType(bound) == PERIODIC) {
+		top->bond_top[n - 1].i0 = n - 1;
+		top->bond_top[n - 1].i1 = 0;
 	}
 	top->num_bonds = num_bonds;
 
 	// angle topology
-	const int32_t num_angles = n - 2;
+	int32_t num_angles = n - 2;
+	if (getBoundaryType(bound) == PERIODIC) num_angles += 2;
 	top->angle_top = (triple*)xmalloc(num_angles * sizeof(triple));
-	for (int32_t i = 0; i < num_angles; i++) {
+	for (int32_t i = 0; i < n - 2; i++) {
 		top->angle_top[i].i0 = i + 0;
 		top->angle_top[i].i1 = i + 1;
 		top->angle_top[i].i2 = i + 2;
+	}
+	if (getBoundaryType(bound) == PERIODIC) {
+		top->angle_top[n - 2].i0 = n - 2;
+		top->angle_top[n - 2].i1 = n - 1;
+		top->angle_top[n - 2].i2 = 0;
+		top->angle_top[n - 1].i0 = n - 1;
+		top->angle_top[n - 1].i1 = 0;
+		top->angle_top[n - 1].i2 = 1;
 	}
 	top->num_angles = num_angles;
 
 	return top;
 }
 
-/*topol* newTopolMesh()
+static int32_t getMeshId(int32_t x,
+	int32_t y,
+	const int32_t side_dim_x,
+	const int32_t side_dim_y)
 {
+	if (x < 0) x += side_dim_x;
+	if (x >= side_dim_x) x -= side_dim_x;
+	if (y < 0) y += side_dim_y;
+	if (y >= side_dim_y) y -= side_dim_y;
+	return x + y * side_dim_x;
+}
 
-}*/
+topol* newTopolMesh(const Parameter* param,
+	const Boundary* bound)
+{
+	if (getBoundaryType(bound) == FREE) {
+		fprintf(stderr, "Error occurs at %s %d\n", __FILE__, (int32_t)__LINE__);
+		fprintf(stderr, "%s cannot be specified for 3D simulation.\n", getBoundaryNameFromType(getBoundaryType(bound)));
+		exit(1);
+	}
+
+	const int32_t n = getNumPtcl(param);
+	const int32_t side_dim_x = getSideDimx(param);
+	const int32_t side_dim_y = getSideDimy(param);
+	if (n != (side_dim_x * side_dim_y)) {
+		fprintf(stderr, "Error occurs at %s %d\n", __FILE__, (int32_t)__LINE__);
+		fprintf(stderr, "Number of particles should be equal to side_dim_x * side_dim_y.\n");
+		fprintf(stderr, "num_ptcl = %d.\n", n);
+		fprintf(stderr, "side_dim_x = %d, side_dim_y = %d.\n", side_dim_x, side_dim_y);
+		exit(1);
+	}
+
+	topol* top = (topol*)xmalloc(sizeof(topol));
+
+	// bond topology
+	const int32_t num_bonds = 2 * n;
+	top->bond_top = (pair*)xmalloc(num_bonds * sizeof(pair));
+	int32_t cnt0 = 0, cnt1 = n;
+	for (int32_t y = 0; y < side_dim_y; y++) {
+		for (int32_t x = 0; x < side_dim_x; x++) {
+			top->bond_top[cnt0].i0 = getMeshId(x + 0, y, side_dim_x, side_dim_y);
+			top->bond_top[cnt0].i1 = getMeshId(x + 1, y, side_dim_x, side_dim_y);
+			cnt0++;
+			top->bond_top[cnt1].i0 = getMeshId(x, y + 0, side_dim_x, side_dim_y);
+			top->bond_top[cnt1].i1 = getMeshId(x, y + 1, side_dim_x, side_dim_y);
+			cnt1++;
+		}
+	}
+	top->num_bonds = num_bonds;
+
+	// angle topology
+	const int32_t num_angles = 2 * n;
+	top->angle_top = (triple*)xmalloc(num_angles * sizeof(triple));
+	cnt0 = 0; cnt1 = n;
+	for (int32_t y = 0; y < side_dim_y; y++) {
+		for (int32_t x = 0; x < side_dim_x; x++) {
+			top->angle_top[cnt0].i0 = getMeshId(x + 0, y, side_dim_x, side_dim_y);
+			top->angle_top[cnt0].i1 = getMeshId(x + 1, y, side_dim_x, side_dim_y);
+			top->angle_top[cnt0].i2 = getMeshId(x + 2, y, side_dim_x, side_dim_y);
+			cnt0++;
+			top->angle_top[cnt1].i0 = getMeshId(x, y + 0, side_dim_x, side_dim_y);
+			top->angle_top[cnt1].i1 = getMeshId(x, y + 1, side_dim_x, side_dim_y);
+			top->angle_top[cnt1].i1 = getMeshId(x, y + 2, side_dim_x, side_dim_y);
+			cnt1++;
+		}
+	}
+	top->num_angles = num_angles;
+
+	return top;
+}
 
 void deleteTopol(topol* top)
 {

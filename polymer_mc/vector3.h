@@ -1,6 +1,8 @@
 #ifndef VECTOR3_H
 #define VECTOR3_H
 
+#include "utils.h"
+
 typedef struct {
   double x, y, z;
 } dvec;
@@ -8,15 +10,6 @@ typedef struct {
 void clear_dvec(dvec* self);
 void fill_dvec(dvec* self, const double val);
 
-double get_x(const dvec* self);
-void set_x(dvec* self, const double x);
-double get_y(const dvec* self);
-void set_y(dvec* self, const double y);
-double get_z(const dvec* self);
-void set_z(dvec* self, const double z);
-
-#define CONCATENATE(a, b) a ## b
-#define CONCAT(a, b) CONCATENATE(a, b)
 #define ADD_SUFFIX(a, b) CONCAT(CONCAT(a, _), b)
 
 #define DECL_OP_VEC(OPNAME, VEC) void ADD_SUFFIX(OPNAME, VEC)(VEC* self, const VEC* v0)
@@ -33,14 +26,11 @@ DECL_OP_SCALAR_NEW(OPNAME, VEC, T);
 DECL_OP_FUNCS(dvec, double, add, +)
 DECL_OP_FUNCS(dvec, double, sub, -)
 DECL_OP_FUNCS(dvec, double, mul, *)
-DECL_OP_FUNCS(dvec, double, div, / )
+DECL_OP_FUNCS(dvec, double, div, /)
 
 double dvec_dot(const dvec* v0, const dvec* v1);
 double norm2(const dvec* self);
 double norm(const dvec* self);
-double distance2(const dvec* pos0, const dvec* pos1);
-double distance(const dvec* pos0, const dvec* pos1);
-double cos_angle(const dvec* pos0, const dvec* pos1, const dvec* pos2);
 void normalize(dvec* vec);
 
 #endif

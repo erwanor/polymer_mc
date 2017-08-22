@@ -1,10 +1,9 @@
 #include "system.h"
 
-#include "evolver.h"
 #include "topol.h"
-#include "parameter.h"
+#include "evolver.h"
 #include "utils.h"
-#include "vector3.h"
+#include "file_utils.h"
 #include "observer.h"
 #include "mt_rand.h"
 
@@ -49,6 +48,7 @@ double getAcceptRatio(const System* self)
 }
 
 void initializeSystem(System* self,
+	const Boundary* bound,
 	const Parameter* param,
 	confMaker conf_make,
 	topolMaker topol_make)
@@ -59,7 +59,7 @@ void initializeSystem(System* self,
 	conf_make(self, param);
 
 	// create topology
-	self->top = topol_make(param);
+	self->top = topol_make(param, bound);
 	self->id2top = newId2Topol(self->top, param);
 
 	debugDumpTopolInfo(self->top, param);
@@ -111,6 +111,7 @@ void writeFinalConfig(System* self,
 
 // NOTE: main simulation loop is described here.
 void executeSimulation(System* self,
+	const Boundary* boundary,
 	const Parameter* param)
 {
 	Observer* observer = newObserver(getRootDir(param));
@@ -121,8 +122,11 @@ void executeSimulation(System* self,
 	const int32_t observe_interval_mic = getObserveIntervalMic(param);
 	const int32_t observe_interval_mac = getObserveIntervalMac(param);
 	for (int32_t i = 0; i < tot_steps; i++) {
-		self->accept_ratio = evolveMc(self, param, mtst);
-		if (i % observe_interval_mic == 0) observeMicroVars(observer, i, self, param);
-		if (i % observe_interval_mac == 0) observeMacroVars(observer, i, self, param);
+		self->accept_ratio = evolveMc(self, param, boundary, mtst);
+		if (i % observe_interval_mic == 0) observeMicroVars(observer, i, self, boundary, param);
+		if (i % observe_interval_mac == 0) observeMacroVars(observer, i, self, boundary, param);
 	}
+
+	deleteObserver(observer);
+	deleteMTstate(mtst);
 }

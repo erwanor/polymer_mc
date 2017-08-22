@@ -3,15 +3,18 @@
 
 #include <stdbool.h>
 
-#include "system.h"
-#include "parameter.h"
-#include "mt_rand.h"
-#include "vector3.h"
+struct System_t;
+typedef struct System_t System;
 
-dvec kickParticle(const dvec* pos, const double disp, MTstate* mtst);
-double calcBondEnergy(const dvec* pos0, const dvec* pos1, const double k);
-double calcAngleEnergy(const dvec* pos0, const dvec* pos1, const dvec* pos2, const double k);
-bool newStateIsAccepted(const double deltaE, MTstate* mtst);
-double evolveMc(System* system, const Parameter* param, MTstate* mtst);
+struct Parameter_t;
+typedef struct Parameter_t Parameter;
+
+struct Boundary_t;
+typedef struct Boundary_t Boundary;
+
+struct MTstate_t;
+typedef struct MTstate_t MTstate;
+
+double evolveMc(System* system, const Parameter* param, const Boundary* bound, MTstate* mtst);
 
 #endif

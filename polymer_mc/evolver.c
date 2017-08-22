@@ -5,37 +5,32 @@
 #endif
 #include <math.h>
 
+#include "mt_rand.h"
+#include "parameter.h"
+#include "system.h"
 #include "topol.h"
 #include "utils.h"
+#include "interactions.h"
 
-dvec kickParticle(const dvec* pos0,
+static dvec kickParticle(const dvec* pos0,
 	const double disp,
-	MTstate* mtst)
+	MTstate* mtst,
+	const Boundary* bound)
 {
 	dvec disp_vec;
 	disp_vec.x = disp * (2.0 * genrand_res53(mtst) - 1.0);
 	disp_vec.y = disp * (2.0 * genrand_res53(mtst) - 1.0);
-	// disp_vec.z = disp * (2.0 * genrand_res53(mtst) - 1.0);
-	disp_vec.z = 0.0;
-	return add_dvec_new(pos0, &disp_vec);
+#if 0
+	disp_vec.z = disp * (2.0 * genrand_res53(mtst) - 1.0); // for 3D MC
+#else
+	disp_vec.z = 0.0; // for 2D MC
+#endif
+	dvec new_pos = add_dvec_new(pos0, &disp_vec);
+	applyBoundaryCond(bound, &new_pos);
+	return new_pos;
 }
 
-double calcBondEnergy(const dvec* pos0,
-	const dvec* pos1,
-	const double k)
-{
-	return 0.5 * k * distance2(pos0, pos1);
-}
-
-double calcAngleEnergy(const dvec* pos0,
-	const dvec* pos1,
-	const dvec* pos2,
-	const double k)
-{
-	return k * (1.0 - cos_angle(pos0, pos1, pos2));
-}
-
-bool newStateIsAccepted(const double deltaE,
+static bool newStateIsAccepted(const double deltaE,
 	MTstate* mtst)
 {
 	if (deltaE < 0.0) {
@@ -47,9 +42,10 @@ bool newStateIsAccepted(const double deltaE,
 	}
 }
 
-double calcBondEnergyLocalSum(dvec* pos,
+static double calcBondEnergyLocalSum(dvec* pos,
 	const int32_t id_picked,
 	const ptclid2topol* id2top,
+	const Boundary* bound,
 	const double cf_bond)
 {
 	double esum = 0.0;
@@ -57,14 +53,15 @@ double calcBondEnergyLocalSum(dvec* pos,
 	for (int32_t bond = 0; bond < num_bonds; bond++) {
 		const int32_t i = id2top[id_picked].pair[bond].i0;
 		const int32_t j = id2top[id_picked].pair[bond].i1;
-		esum += calcBondEnergy(&pos[i], &pos[j], cf_bond);
+		esum += calcBondEnergy(&pos[i], &pos[j], cf_bond, bound);
 	}
 	return esum;
 }
 
-double calcAngleEnergyLocalSum(dvec* pos,
+static double calcAngleEnergyLocalSum(dvec* pos,
 	const int32_t id_picked,
 	const ptclid2topol* id2top,
+	const Boundary* bound,
 	const double cf_angle)
 {
 	double esum = 0.0;
@@ -73,25 +70,27 @@ double calcAngleEnergyLocalSum(dvec* pos,
 		const int32_t i = id2top[id_picked].triple[angle].i0;
 		const int32_t j = id2top[id_picked].triple[angle].i1;
 		const int32_t k = id2top[id_picked].triple[angle].i2;
-		esum += calcAngleEnergy(&pos[i], &pos[j], &pos[k], cf_angle);
+		esum += calcAngleEnergy(&pos[i], &pos[j], &pos[k], cf_angle, bound);
 	}
 	return esum;
 }
 
-double calcLocEnergy(dvec* pos,
+static double calcLocEnergy(dvec* pos,
 	const int32_t id_picked,
 	const ptclid2topol* id2top,
+	const Boundary* bound,
 	const double cf_bond,
 	const double cf_angle)
 {
-	return calcBondEnergyLocalSum(pos, id_picked, id2top, cf_bond)
-		+ calcAngleEnergyLocalSum(pos, id_picked, id2top, cf_angle);
+	return calcBondEnergyLocalSum(pos, id_picked, id2top, bound, cf_bond)
+		+ calcAngleEnergyLocalSum(pos, id_picked, id2top, bound, cf_angle);
 }
 
-void mcStep(dvec* pos,
+static void mcStep(dvec* pos,
 	MTstate* mtst,
 	int32_t* num_accepted,
 	const ptclid2topol* id2top,
+	const Boundary* bound,
 	const int32_t num_ptcl,
 	const double disp,
 	const double cf_bond,
@@ -100,9 +99,9 @@ void mcStep(dvec* pos,
 	const int32_t id_picked = genrand_int31(mtst) % num_ptcl;
 	const dvec pos_tmp = pos[id_picked];
 
-	const double e_locsum_bef = calcLocEnergy(pos, id_picked, id2top, cf_bond, cf_angle);
-	pos[id_picked] = kickParticle(&pos_tmp, disp, mtst);
-	const double e_locsum_aft = calcLocEnergy(pos, id_picked, id2top, cf_bond, cf_angle);
+	const double e_locsum_bef = calcLocEnergy(pos, id_picked, id2top, bound, cf_bond, cf_angle);
+	pos[id_picked] = kickParticle(&pos_tmp, disp, mtst, bound);
+	const double e_locsum_aft = calcLocEnergy(pos, id_picked, id2top, bound, cf_bond, cf_angle);
 	const double dE = e_locsum_aft - e_locsum_bef;
 
 	if (newStateIsAccepted(dE, mtst)) {
@@ -114,6 +113,7 @@ void mcStep(dvec* pos,
 
 double evolveMc(System* system,
 	const Parameter* param,
+	const Boundary* bound,
 	MTstate* mtst)
 {
 	const int32_t num_ptcl  = getNumPtcl(param);
@@ -126,7 +126,7 @@ double evolveMc(System* system,
 
 	int32_t num_accepted = 0;
 	for (int32_t p = 0; p < num_ptcl; p++) {
-		mcStep(pos, mtst, &num_accepted, id2top, num_ptcl, step_len, cf_bond, cf_angle);
+		mcStep(pos, mtst, &num_accepted, id2top, bound, num_ptcl, step_len, cf_bond, cf_angle);
 	}
 
 	return (double)num_accepted / (double)num_ptcl;
