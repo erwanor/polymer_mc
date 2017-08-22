@@ -17,7 +17,7 @@ void createStraightChain(System* system,
 	const int32_t num_ptcl = getNumPtcl(param);
 	const double blen = getBondLen(param);
 	dvec* pos = getPos(system);
-	dvec dr = {0.0};
+	dvec dr = { 0.0, 0.0, 0.0 };
 	dr.x = blen;
 	clear_dvec(&pos[0]);
 	for (int32_t i = 1; i < num_ptcl; i++) {
@@ -41,7 +41,7 @@ void createFlatMesh(System* system,
 	const int32_t side_dim = (int32_t)sqrt(num_ptcl);
 
 	int32_t cnt = 0;
-	dvec r = { 0.0 };
+	dvec r = { 0.0, 0.0, 0.0 };
 	for (int32_t y = 0; y < side_dim; y++) {
 		r.y = (y + 0.5) * blen;
 		for (int32_t x = 0; x < side_dim; x++) {

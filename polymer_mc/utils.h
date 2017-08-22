@@ -4,6 +4,8 @@
 #define STR(x) #x
 #define CONCATNATE(x, y) x ## y
 #define CONCAT(x, y) CONCATNATE(x, y)
+#define STRUCT_AT(x, y) CONCAT(x-, >y)
+#define UNUSED_PARAMETER(val) (void)(val)
 
 #ifdef DEBUG
 #define DEBUG_PRINT(...)                        \
@@ -14,6 +16,7 @@
 #define DEBUG_PRINT(...) do {} while (0)
 #endif
 
+#include <stdio.h>
 #include <stddef.h>
 
 void* xmalloc(const size_t size);

@@ -161,7 +161,7 @@ static void observePressure(Observer* self,
 	GET_TOPOLOGY(system, param);
 	const dvec* pos = getPos(system);
 
-	dtensor3 vir_tot = {0.0};
+	dtensor3 vir_tot = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	for (int32_t b = 0; b < num_bonds; b++) {
 		const dtensor3 dvir = calcBondVirial(&pos[bond_top[b].i0], &pos[bond_top[b].i1], cf_b, bound);
 		dtensor3_add(&vir_tot, &dvir);

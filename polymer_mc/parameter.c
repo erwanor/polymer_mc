@@ -193,7 +193,7 @@ do {\
 	const size_t size_keys = vector_ptr_string_size(keys);\
 	const size_t value_at  = findElementInVectorString(keys, STR(value_name));\
 	if (value_at != size_keys) {\
-		CONCAT(CONCAT(param, ->), value_name) = CONCAT(string_to_, Dtype)(vector_ptr_string_at(values, value_at));\
+		STRUCT_AT(param, value_name) = CONCAT(string_to_, Dtype)(vector_ptr_string_at(values, value_at));\
 	} else {\
 		fprintf(stderr, "Cannot find tag %s\n", STR(value_name));\
 		exit(EXIT_FAILURE);\

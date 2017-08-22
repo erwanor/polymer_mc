@@ -34,7 +34,8 @@ vector_ptr_string* read_lines(FILE* fp) {
   string* buffer = new_string();
   const size_t file_size = get_file_size(fp) + 1; // include '\0'
   resize_noinit_string(buffer, file_size);
-  fread(string_to_char(buffer), sizeof(char), file_size, fp);
+  const size_t num_read = fread(string_to_char(buffer), sizeof(char), file_size, fp);
+  UNUSED_PARAMETER(num_read);
   vector_ptr_string* ret = split_string(buffer, "\n");
   delete_string(buffer);
   return ret;
