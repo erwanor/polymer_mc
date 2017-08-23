@@ -64,12 +64,15 @@ static const char* getFileNameFromObserverType(ObserverType type)
 Observer* newObserver(const string* dir_path)
 {
 	Observer* self = (Observer*)xmalloc(sizeof(Observer));
+	string* fname = new_string();
 	for (int32_t i = 0; i < NUM_OF_TYPES; i++) {
-		string* fname = new_string_from_string(dir_path);
+		append_string(fname, dir_path);
 		append_char(fname, "/");
 		append_char(fname, getFileNameFromObserverType(i));
 		self->fps[i] = xfopen(string_to_char(fname), "w");
+		clear_string(fname);
 	}
+	delete_string(fname);
 	return self;
 }
 

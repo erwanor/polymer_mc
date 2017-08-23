@@ -41,6 +41,7 @@ void deleteParameter(Parameter* self)
 {
 	dumpAllParameter(self);
 	delete_string(self->root_dir);
+	delete_string(self->boundary_name);
 	xfree(self);
 }
 
@@ -88,6 +89,7 @@ static void dumpAllParameter(Parameter* self)
 	DUMP_WITH_TAG("%s = %lf\n", box_length.z);
 	DUMP_WITH_TAG("%s = %u\n", rand_seed);
 	fprintf(fp, "%s = %s\n", "boundary_name", string_to_char(self->boundary_name));
+	delete_string(fname);
 	xfclose(fp);
 }
 
@@ -178,13 +180,15 @@ static void getKeysAndValues(const vector_ptr_string* key_values,
 static size_t findElementInVectorString(const vector_ptr_string* array,
 	const char* elem)
 {
-	const string* elem_string = new_string_from_char(elem);
+	string* elem_string = new_string_from_char(elem);
 	const size_t size_array = vector_ptr_string_size(array);
 	for (size_t i = 0; i < size_array; i++) {
 		if (eq_string(elem_string, vector_ptr_string_at(array, i))) {
+			delete_string(elem_string);
 			return i; // found!
 		}
 	}
+	delete_string(elem_string);
 	return size_array; // not found!
 }
 
