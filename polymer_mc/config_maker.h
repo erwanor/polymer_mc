@@ -8,6 +8,7 @@ struct Parameter_t;
 typedef struct Parameter_t Parameter;
 
 void createStraightChain(System* system, const Parameter* param);
+void createRandomChain(System* system, const Parameter* param);
 void createFlatMesh(System* system, const Parameter* param);
 
 #endif

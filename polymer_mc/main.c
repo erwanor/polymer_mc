@@ -37,7 +37,8 @@ int main(const int argc, const char* argv[])
 	if (is3d) {
 		initializeSystem(system, boundary, param, createFlatMesh, newTopolMesh);
 	} else {
-		initializeSystem(system, boundary, param, createStraightChain, newTopolChain);
+		// initializeSystem(system, boundary, param, createStraightChain, newTopolChain);
+		initializeSystem(system, boundary, param, createRandomChain, newTopolChain);
 	}
 
 	// readRestartConfig(system, param);
