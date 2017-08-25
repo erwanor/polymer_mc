@@ -18,7 +18,7 @@ typedef struct {
 struct topol_t;
 typedef struct topol_t topol;
 
-#if 0
+#ifdef SIMULATION_3D
 // for 2D mesh
 #define NUM_NEIGHBOR_PAIR 4
 #define NUM_NEIGHBOR_TRIPLE 6
