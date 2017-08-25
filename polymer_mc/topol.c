@@ -126,7 +126,7 @@ topol* newTopolMesh(const Parameter* param,
 			cnt0++;
 			top->angle_top[cnt1].i0 = getMeshId(x, y + 0, side_dim_x, side_dim_y);
 			top->angle_top[cnt1].i1 = getMeshId(x, y + 1, side_dim_x, side_dim_y);
-			top->angle_top[cnt1].i1 = getMeshId(x, y + 2, side_dim_x, side_dim_y);
+			top->angle_top[cnt1].i2 = getMeshId(x, y + 2, side_dim_x, side_dim_y);
 			cnt1++;
 		}
 	}

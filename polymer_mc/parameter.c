@@ -204,8 +204,7 @@ do {\
 	}\
 } while (0)
 
-void readParameterFromFile(Parameter* self,
-	const bool is3d)
+void readParameterFromFile(Parameter* self)
 {
 	string* input_fname = new_string_from_string(self->root_dir);
 	append_char(input_fname, "/input.dat");
@@ -217,13 +216,13 @@ void readParameterFromFile(Parameter* self,
 	vector_ptr_string* values = vector_ptr_string_new();
 	getKeysAndValues(input_lines, keys, values);
 
-	if (is3d) {
-		MATCH(keys, values, side_dim_x, self, int32_t);
-		MATCH(keys, values, side_dim_y, self, int32_t);
-		self->num_ptcl = self->side_dim_x * self->side_dim_y;
-	} else {
-		MATCH(keys, values, num_ptcl, self, int32_t);
-	}
+#ifdef SIMULATION_3D
+	MATCH(keys, values, side_dim_x, self, int32_t);
+	MATCH(keys, values, side_dim_y, self, int32_t);
+	self->num_ptcl = self->side_dim_x * self->side_dim_y;
+#else
+	MATCH(keys, values, num_ptcl, self, int32_t);
+#endif
 	MATCH(keys, values, bond_len, self, double);
 	MATCH(keys, values, step_len, self, double);
 	MATCH(keys, values, cf_bond, self, double);
@@ -235,7 +234,9 @@ void readParameterFromFile(Parameter* self,
 	if (getBoundaryTypeFromName(self->boundary_name) == PERIODIC) {
 		MATCH(keys, values, box_length.x, self, double);
 		MATCH(keys, values, box_length.y, self, double);
-		if (is3d) { MATCH(keys, values, box_length.z, self, double); }
+#ifdef SIMULATION_3D
+		MATCH(keys, values, box_length.z, self, double);
+#endif
 	}
 	MATCH(keys, values, rand_seed, self, uint32_t);
 

@@ -20,10 +20,10 @@ static dvec kickParticle(const dvec* pos0,
 	dvec disp_vec;
 	disp_vec.x = disp * (2.0 * genrand_res53(mtst) - 1.0);
 	disp_vec.y = disp * (2.0 * genrand_res53(mtst) - 1.0);
-#if 0
-	disp_vec.z = disp * (2.0 * genrand_res53(mtst) - 1.0); // for 3D MC
+#ifdef SIMULATION_3D
+	disp_vec.z = disp * (2.0 * genrand_res53(mtst) - 1.0);
 #else
-	disp_vec.z = 0.0; // for 2D MC
+	disp_vec.z = 0.0;
 #endif
 	dvec new_pos = add_dvec_new(pos0, &disp_vec);
 	applyBoundaryCond(bound, &new_pos);

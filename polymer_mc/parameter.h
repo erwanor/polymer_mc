@@ -28,6 +28,6 @@ dvec getBoxlength(const Parameter* self);
 int32_t getSideDimx(const Parameter* self);
 int32_t getSideDimy(const Parameter* self);
 
-void readParameterFromFile(Parameter* self, const bool is3d);
+void readParameterFromFile(Parameter* self);
 
 #endif

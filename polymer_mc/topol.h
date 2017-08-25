@@ -21,7 +21,7 @@ typedef struct topol_t topol;
 #if 0
 // for 2D mesh
 #define NUM_NEIGHBOR_PAIR 4
-#define NUM_NEIGHBOR_TRIPLE 12
+#define NUM_NEIGHBOR_TRIPLE 6
 #else
 // for 1D chain
 #define NUM_NEIGHBOR_PAIR 2
