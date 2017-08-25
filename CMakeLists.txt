@@ -4,6 +4,8 @@ set(CMAKE_VERBOSE_MAKEFILE 1)
 file(GLOB c_srcs ./polymer_mc/*.c)
 include_directories(./polymer_mc)
 
+add_definitions(-DSIMULATION_3D)
+
 # set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
