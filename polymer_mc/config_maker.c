@@ -2,9 +2,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#if _MSC_VER
-#define _USE_MATH_DEFINES
-#endif
 #include <math.h>
 #include <stdbool.h>
 
@@ -15,7 +12,6 @@
 #include "system.h"
 
 static double uniform(void);
-static double normal(void);
 
 void createStraightChain(System* system,
 	const Parameter* param)
@@ -36,14 +32,6 @@ static double uniform(void)
 	return ((double) rand() + 1.0) / ((double)RAND_MAX + 2.0);
 }
 
-// NOTE: this function is not thread safe.
-static double normal(void)
-{
-	const double v0 = uniform();
-	const double v1 = uniform();
-	return sqrt(-2.0 * log(v0)) *  cos(2.0 * M_PI * v1);
-}
-
 void createRandomChain(System* system,
 	const Parameter* param)
 {
@@ -53,8 +41,8 @@ void createRandomChain(System* system,
 	dvec dr = { 0.0, 0.0, 0.0 };
 	clear_dvec(&pos[0]);
 	for (int32_t i = 1; i < num_ptcl; i++) {
-		dr.x = len * normal();
-		dr.y = len * normal();
+		dr.x = len * (2.0 * uniform() - 1.0);
+		dr.y = len * (2.0 * uniform() - 1.0);
 		pos[i] = add_dvec_new(&pos[i - 1], &dr);
 	}
 }
