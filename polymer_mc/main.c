@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "user_defs.h"
 #include "system.h"
 #include "topol.h"
 #include "parameter.h"
