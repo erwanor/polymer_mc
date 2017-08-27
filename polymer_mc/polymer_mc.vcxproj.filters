@@ -60,9 +60,6 @@
     <ClCompile Include="file_utils.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="interactions.c">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="math_utils.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>

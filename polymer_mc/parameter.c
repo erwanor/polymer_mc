@@ -192,12 +192,12 @@ static size_t findElementInVectorString(const vector_ptr_string* array,
 	return size_array; // not found!
 }
 
-#define MATCH(keys, values, value_name, param, Dtype)\
+#define MATCH(value_name, Dtype)\
 do {\
 	const size_t size_keys = vector_ptr_string_size(keys);\
 	const size_t value_at  = findElementInVectorString(keys, STR(value_name));\
 	if (value_at != size_keys) {\
-		STRUCT_AT(param, value_name) = CONCAT(string_to_, Dtype)(vector_ptr_string_at(values, value_at));\
+		STRUCT_AT(self, value_name) = CONCAT(string_to_, Dtype)(vector_ptr_string_at(values, value_at));\
 	} else {\
 		fprintf(stderr, "Cannot find tag %s\n", STR(value_name));\
 		exit(EXIT_FAILURE);\
@@ -217,28 +217,28 @@ void readParameterFromFile(Parameter* self)
 	getKeysAndValues(input_lines, keys, values);
 
 #ifdef SIMULATION_3D
-	MATCH(keys, values, side_dim_x, self, int32_t);
-	MATCH(keys, values, side_dim_y, self, int32_t);
+	MATCH(side_dim_x, int32_t);
+	MATCH(side_dim_y, int32_t);
 	self->num_ptcl = self->side_dim_x * self->side_dim_y;
 #else
-	MATCH(keys, values, num_ptcl, self, int32_t);
+	MATCH(num_ptcl, int32_t);
 #endif
-	MATCH(keys, values, bond_len, self, double);
-	MATCH(keys, values, step_len, self, double);
-	MATCH(keys, values, cf_bond, self, double);
-	MATCH(keys, values, cf_angle, self, double);
-	MATCH(keys, values, total_steps, self, int32_t);
-	MATCH(keys, values, observe_interval_mic, self, int32_t);
-	MATCH(keys, values, observe_interval_mac, self, int32_t);
-	MATCH(keys, values, boundary_name, self, string);
+	MATCH(bond_len, double);
+	MATCH(step_len, double);
+	MATCH(cf_bond, double);
+	MATCH(cf_angle, double);
+	MATCH(total_steps, int32_t);
+	MATCH(observe_interval_mic, int32_t);
+	MATCH(observe_interval_mac, int32_t);
+	MATCH(boundary_name, string);
 	if (getBoundaryTypeFromName(self->boundary_name) == PERIODIC) {
-		MATCH(keys, values, box_length.x, self, double);
-		MATCH(keys, values, box_length.y, self, double);
+		MATCH(box_length.x, double);
+		MATCH(box_length.y, double);
 #ifdef SIMULATION_3D
-		MATCH(keys, values, box_length.z, self, double);
+		MATCH(box_length.z, double);
 #endif
 	}
-	MATCH(keys, values, rand_seed, self, uint32_t);
+	MATCH(rand_seed, uint32_t);
 
 	delete_splitted_strings(input_lines);
 	delete_splitted_strings(keys);

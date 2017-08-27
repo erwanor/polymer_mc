@@ -25,6 +25,7 @@ static string* allocate(void) {
   self->data     = (char*) xmalloc(sizeof(char) * INIT_MAX_DATA_SIZE);
   self->capacity = INIT_MAX_DATA_SIZE;
   self->size     = 1;
+  self->data[0] = '\0';
   return self;
 }
 
