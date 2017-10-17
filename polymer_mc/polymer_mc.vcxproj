@@ -133,7 +133,6 @@
     <ClCompile Include="err_msgs.c" />
     <ClCompile Include="evolver.c" />
     <ClCompile Include="file_utils.c" />
-    <ClCompile Include="interactions.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="math_utils.c" />
     <ClCompile Include="mt_rand.c" />
