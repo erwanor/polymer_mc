@@ -8,11 +8,11 @@ struct Boundary_t;
 typedef struct Boundary_t Boundary;
 
 typedef struct {
-	int32_t i0, i1;
+  int32_t i0, i1;
 } pair;
 
 typedef struct {
-	int32_t i0, i1, i2;
+  int32_t i0, i1, i2;
 } triple;
 
 struct topol_t;
@@ -29,10 +29,10 @@ typedef struct topol_t topol;
 #endif
 
 typedef struct ptclid2topol_t {
-	int32_t num_pair;
-	pair pair[NUM_NEIGHBOR_PAIR];
-	int32_t num_triple;
-	triple triple[NUM_NEIGHBOR_TRIPLE];
+  int32_t num_pair;
+  pair pair[NUM_NEIGHBOR_PAIR];
+  int32_t num_triple;
+  triple triple[NUM_NEIGHBOR_TRIPLE];
 } ptclid2topol;
 
 topol* newTopolChain(const Parameter* param, const Boundary* bound);

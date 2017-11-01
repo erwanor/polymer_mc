@@ -4,9 +4,9 @@
 #include "vector3.h"
 
 typedef struct dtensor3_t {
-	double xx, xy, xz;
-	double yx, yy, yz;
-	double zx, zy, zz;
+  double xx, xy, xz;
+  double yx, yy, yz;
+  double zx, zy, zz;
 } dtensor3;
 
 dtensor3 dtensor3_dot(const dvec* v0, const dvec* v1);

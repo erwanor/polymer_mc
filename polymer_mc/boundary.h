@@ -8,8 +8,8 @@ struct System_t;
 typedef struct System_t System;
 
 typedef enum {
-	PERIODIC = 0,
-	FREE,
+  PERIODIC = 0,
+  FREE,
 } BOUNDARY_TYPE;
 
 struct Boundary_t;

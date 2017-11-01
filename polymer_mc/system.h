@@ -29,7 +29,7 @@ ptclid2topol* getPtclId2Topol(const System* self);
 dvec* getPos(const System* self);
 double getAcceptRatio(const System* self);
 
-void initializeSystem(System* self, const Boundary* boundary, const Parameter* param,	confMaker conf_make, topolMaker topol_make);
+void initializeSystem(System* self, const Boundary* boundary, const Parameter* param, confMaker conf_make, topolMaker topol_make);
 void executeSimulation(System* self, const Boundary* boundary, const Parameter* param);
 
 void readRestartConfig(System* self, const Parameter* param);
