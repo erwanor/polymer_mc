@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
-file(GLOB c_srcs ./polymer_mc/*.c)
-include_directories(./polymer_mc)
+file(GLOB c_srcs ./src/*.c)
+include_directories(./include)
 
 add_definitions(-DSIMULATION_3D)
 
