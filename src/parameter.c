@@ -177,31 +177,13 @@ static void getKeysAndValues(const vector_ptr_string* key_values,
   }
 }
 
-static size_t findElementInVectorString(const vector_ptr_string* array,
-                                        const char* elem)
-{
-  string* elem_string = new_string_from_char(elem);
-  const size_t size_array = vector_ptr_string_size(array);
-  for (size_t i = 0; i < size_array; i++) {
-    if (eq_string(elem_string, vector_ptr_string_at(array, i))) {
-      delete_string(elem_string);
-      return i; // found!
-    }
-  }
-  delete_string(elem_string);
-  return size_array; // not found!
-}
-
-#define MATCH(value_name, Dtype)                                        \
+#define MATCH(value, Dtype)                                             \
   do {                                                                  \
-    const size_t size_keys = vector_ptr_string_size(keys);              \
-    const size_t value_at  = findElementInVectorString(keys, STR(value_name)); \
-    if (value_at != size_keys) {                                        \
-      STRUCT_AT(self, value_name) = CONCAT(string_to_, Dtype)(vector_ptr_string_at(values, value_at)); \
-    } else {                                                            \
-      fprintf(stderr, "Cannot find tag %s\n", STR(value_name));         \
-      exit(EXIT_FAILURE);                                               \
+    string* value_name = new_string_from_char(STR(value));              \
+    if (eq_string(value_name, vector_ptr_string_at(keys, iter))) {      \
+      STRUCT_AT(self, value) = CONCAT(string_to_, Dtype)(vector_ptr_string_at(values, iter)); \
     }                                                                   \
+    delete_string(value_name);                                          \
   } while (0)
 
 void readParameterFromFile(Parameter* self)
@@ -216,33 +198,44 @@ void readParameterFromFile(Parameter* self)
   vector_ptr_string* values = vector_ptr_string_new();
   getKeysAndValues(input_lines, keys, values);
 
-#ifdef SIMULATION_3D
-  MATCH(side_dim_x, int32_t);
-  MATCH(side_dim_y, int32_t);
-  self->num_ptcl = self->side_dim_x * self->side_dim_y;
-#else
-  MATCH(num_ptcl, int32_t);
-#endif
-  MATCH(bond_len, double);
-  MATCH(step_len, double);
-  MATCH(cf_bond, double);
-  MATCH(cf_angle, double);
-  MATCH(total_steps, int32_t);
-  MATCH(observe_interval_mic, int32_t);
-  MATCH(observe_interval_mac, int32_t);
-  MATCH(boundary_name, string);
-  if (getBoundaryTypeFromName(self->boundary_name) == PERIODIC) {
-    MATCH(box_length.x, double);
-    MATCH(box_length.y, double);
-#ifdef SIMULATION_3D
-    MATCH(box_length.z, double);
-#endif
-  }
-  MATCH(rand_seed, uint32_t);
+  size_t iter = 0, num_inputs = vector_ptr_string_size(keys);
+  while (num_inputs != iter) {
+    if (string_to_char(vector_ptr_string_at(keys, iter))[0] == ';') {
+      fprintf(stdout, "# Skipping comment line.\n");
+      iter++;
+      continue;
+    }
 
+#ifdef SIMULATION_3D
+    MATCH(side_dim_x, int32_t);
+    MATCH(side_dim_y, int32_t);
+    self->num_ptcl = self->side_dim_x * self->side_dim_y;
+#else
+    MATCH(num_ptcl, int32_t);
+#endif
+    MATCH(bond_len, double);
+    MATCH(step_len, double);
+    MATCH(cf_bond, double);
+    MATCH(cf_angle, double);
+    MATCH(total_steps, int32_t);
+    MATCH(observe_interval_mic, int32_t);
+    MATCH(observe_interval_mac, int32_t);
+    MATCH(boundary_name, string);
+    if (self->boundary_name) { /// boundary name is already set.
+      if (getBoundaryTypeFromName(self->boundary_name) == PERIODIC) {
+        MATCH(box_length.x, double);
+        MATCH(box_length.y, double);
+#ifdef SIMULATION_3D
+        MATCH(box_length.z, double);
+#endif
+      }
+    }
+    MATCH(rand_seed, uint32_t);
+
+    iter++;
+  }
   delete_splitted_strings(input_lines);
   delete_splitted_strings(keys);
   delete_splitted_strings(values);
-
   xfclose(fp);
 }

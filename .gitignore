@@ -53,3 +53,6 @@ dkms.con
 
 # my settings
 build
+GPATH
+GRTAGS
+GTAGS

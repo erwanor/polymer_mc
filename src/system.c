@@ -80,12 +80,15 @@ void readRestartConfig(System* self,
 
   int32_t n = 0;
   FILE* fp = xfopen(string_to_char(fname), "r");
-  fread(&n, sizeof(int32_t), 1, fp);
+
+  size_t _;
+  _ = fread(&n, sizeof(int32_t), 1, fp), (void) _;
+
   if (n != num_ptcls) {
     fprintf(stderr, "%d particles are read from init_confib.bin. However, %d is specified in input.dat\n",
             n, num_ptcls);
   }
-  fread(pos, sizeof(dvec), n, fp);
+  _ = fread(pos, sizeof(dvec), n, fp), (void) _;
 
   xfclose(fp);
   delete_string(fname);
