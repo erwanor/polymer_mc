@@ -27,10 +27,13 @@ void xfclose(FILE* fp)
 
 size_t get_file_size(FILE* fp)
 {
-  fseek(fp, 0, SEEK_END);
-  const size_t size = ftell(fp);
-  fseek(fp, 0, SEEK_SET);
-  return size;
+  struct stat stbuf;
+  const int fd = fileno(fp);
+  if (fstat(fd, &stbuf) == -1) {
+    perror("Error occurs at get_file_size");
+    exit(1);
+  }
+  return stbuf.st_size;
 }
 
 vector_ptr_string* read_lines(FILE* fp)
