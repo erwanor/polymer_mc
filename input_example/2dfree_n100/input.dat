@@ -1,0 +1,10 @@
+num_ptcl 100
+bond_len 0.5
+step_len 0.4
+cf_bond 10.0
+cf_angle 0.0
+total_steps 1000000
+observe_interval_mic 1000
+observe_interval_mac 100
+boundary_name free
+rand_seed 1234
