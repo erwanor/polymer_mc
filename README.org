@@ -1,0 +1,14 @@
+* polymer_mc (Monte Carlo simulation code for polymer chains.)
+** How to compile 
+#+BEGIN_SRC bash
+$ mkdir build
+$ cd bukld
+$ cmake ../ 
+$ make
+#+END_SRC
+** Run
+#+BEGIN_SRC bash
+$ ./polymer_mc dir_name
+#+END_SRC
+** Notice
+This software is still in the beta stage. There may still exist bugs.
