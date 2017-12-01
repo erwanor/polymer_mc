@@ -17,10 +17,10 @@ void createStraightChain(System* system,
                          const Parameter* param)
 {
   const int32_t num_ptcl = getNumPtcl(param);
-  const double blen = getBondLen(param);
+  const double len = getInitBondLen(param);
   dvec* pos = getPos(system);
   dvec dr = { 0.0, 0.0, 0.0 };
-  dr.x = blen;
+  dr.x = len;
   clear_dvec(&pos[0]);
   for (int32_t i = 1; i < num_ptcl; i++) {
     pos[i] = add_dvec_new(&pos[i - 1], &dr);
@@ -36,7 +36,7 @@ void createRandomChain(System* system,
                        const Parameter* param)
 {
   const int32_t num_ptcl = getNumPtcl(param);
-  const double len = getBondLen(param);
+  const double len = getInitBondLen(param);
   dvec* pos = getPos(system);
   dvec dr = { 0.0, 0.0, 0.0 };
   clear_dvec(&pos[0]);
@@ -59,16 +59,16 @@ void createFlatMesh(System* system,
   }
 
   dvec* pos = getPos(system);
-  const double blen = getBondLen(param);
+  const double len = getInitBondLen(param);
   const int32_t side_dim = (int32_t)sqrt(num_ptcl);
 
   int32_t cnt = 0;
   dvec r = { 0.0, 0.0, 0.0 };
-  r.z = blen;
+  r.z = len;
   for (int32_t y = 0; y < side_dim; y++) {
-    r.y = (y + 0.5) * blen;
+    r.y = (y + 0.5) * len;
     for (int32_t x = 0; x < side_dim; x++) {
-      r.x = (x + 0.5) * blen;
+      r.x = (x + 0.5) * len;
       pos[cnt++] = r;
     }
   }

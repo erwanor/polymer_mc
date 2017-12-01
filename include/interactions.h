@@ -10,19 +10,24 @@
 static inline double calcBondEnergy(const dvec* pos0,
                                     const dvec* pos1,
                                     const double k,
+                                    const double l0,
                                     const Boundary* bound)
 {
-  return 0.5 * k * distance2(pos0, pos1, bound);
+  const double dr01 = distance(pos0, pos1, bound);
+  return 0.5 * k * (dr01 - l0) * (dr01 - l0);
 }
 
 static inline dtensor3 calcBondVirial(const dvec* pos0,
                                       const dvec* pos1,
                                       const double k,
+                                      const double l0,
                                       const Boundary* bound)
 {
   dvec dr01 = sub_dvec_new(pos1, pos0);
   applyMinimumImageConv(bound, &dr01);
-  const dvec dF01 = mul_scalar_new(&dr01, k);
+  const double dr01_norm = norm(&dr01);
+  div_scalar(&dr01, dr01_norm); // normalize
+  const dvec dF01 = mul_scalar_new(&dr01, -k * (dr01_norm - l0));
   return dtensor3_dot(&dF01, &dr01);
 }
 

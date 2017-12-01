@@ -1,5 +1,6 @@
 num_ptcl 100
-bond_len 0.5
+bond_len 0.4
+init_blen 0.2
 step_len 0.4
 cf_bond 10.0
 cf_angle 0.0

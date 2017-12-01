@@ -14,4 +14,5 @@ $ ./polymer_mc dir_name
 - C compiler (C11 features are required.)
 - cmake
 ** Notice
-- This software is still in the beta stage. There may still exist bugs.
+- This software is still in the beta stage.
+- There may still exist bugs.

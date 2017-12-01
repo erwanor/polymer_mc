@@ -162,7 +162,8 @@ void observeMacroVars(Observer* self,
   const pair* bond_top = getBondTopol(top);     \
   const triple* angle_top = getAngleTopol(top); \
   const double cf_b = getCfBond(param);         \
-  const double cf_a = getCfAngle(param)
+  const double cf_a = getCfAngle(param);        \
+  const double l0  = getBondLen(param)
 
 typedef struct EnergyBuffer_t {
   double bond;
@@ -207,7 +208,7 @@ static void observeEnergy(Observer* self,
   // sum bonded energy
   double etot_bond = 0.0;
   for (int32_t b = 0; b < num_bonds; b++) {
-    etot_bond += calcBondEnergy(&pos[bond_top[b].i0], &pos[bond_top[b].i1], cf_b, bound);
+    etot_bond += calcBondEnergy(&pos[bond_top[b].i0], &pos[bond_top[b].i1], cf_b, l0, bound);
   }
 
   // sum angle energy
@@ -274,7 +275,11 @@ static void observePressure(Observer* self,
 
   dtensor3 vir_tot = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
   for (int32_t b = 0; b < num_bonds; b++) {
-    const dtensor3 dvir = calcBondVirial(&pos[bond_top[b].i0], &pos[bond_top[b].i1], cf_b, bound);
+    const dtensor3 dvir = calcBondVirial(&pos[bond_top[b].i0],
+                                         &pos[bond_top[b].i1],
+                                         cf_b,
+                                         l0,
+                                         bound);
     dtensor3_add(&vir_tot, &dvir);
   }
   for (int32_t a = 0; a < num_angles; a++) {

@@ -18,6 +18,7 @@ struct Parameter_t {
   int32_t observe_interval_mic;
   int32_t observe_interval_mac;
   double bond_len;
+  double init_blen;
   double step_len;
   double cf_bond;
   double cf_angle;
@@ -101,6 +102,11 @@ int32_t getNumPtcl(const Parameter* self)
 double getBondLen(const Parameter* self)
 {
   return self->bond_len;
+}
+
+double getInitBondLen(const Parameter* self)
+{
+  return self->init_blen;
 }
 
 double getStepLen(const Parameter* self)
@@ -214,6 +220,7 @@ void readParameterFromFile(Parameter* self)
     MATCH(num_ptcl, int32_t);
 #endif
     MATCH(bond_len, double);
+    MATCH(init_blen, double);
     MATCH(step_len, double);
     MATCH(cf_bond, double);
     MATCH(cf_angle, double);

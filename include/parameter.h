@@ -15,6 +15,7 @@ void deleteParameter(Parameter* self);
 
 int32_t getNumPtcl(const Parameter* self);
 double getBondLen(const Parameter* self);
+double getInitBondLen(const Parameter* self);
 double getStepLen(const Parameter* self);
 int32_t getTotalSteps(const Parameter* self);
 int32_t getObserveIntervalMac(const Parameter* self);
