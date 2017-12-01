@@ -45,3 +45,18 @@ dtensor3 dtensor3_sub_new(const dtensor3* t0,
   ret.zx = t0->zx - t1->zx; ret.zy = t0->zy - t1->zy; ret.zz = t0->zz - t1->zz;
   return ret;
 }
+
+void dtensor3_clear(dtensor3* t)
+{
+  t->xx = t->xy = t->xz = 0.0;
+  t->yx = t->yy = t->yz = 0.0;
+  t->zx = t->zy = t->zz = 0.0;
+}
+
+void dtensor3_mul_scalar(dtensor3* t,
+                         const double k)
+{
+  t->xx *= k; t->xy *= k; t->xz *= k;
+  t->yx *= k; t->yy *= k; t->yz *= k;
+  t->zx *= k; t->zy *= k; t->zz *= k;
+}

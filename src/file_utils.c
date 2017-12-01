@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 FILE* xfopen(const char* __restrict fname,
              const char* __restrict mode)

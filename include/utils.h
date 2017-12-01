@@ -6,6 +6,7 @@
 #define CONCAT(x, y) CONCATNATE(x, y)
 #define STRUCT_AT(x, y) CONCAT(x-, >y)
 #define UNUSED_PARAMETER(val) (void)(val)
+#define UNUSED_FUNCTION(func) (void)(func)
 
 #ifdef DEBUG
 #define DEBUG_PRINT(...)                        \

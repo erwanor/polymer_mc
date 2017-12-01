@@ -5,6 +5,7 @@ file(GLOB c_srcs ./src/*.c)
 include_directories(./include)
 
 # add_definitions(-DSIMULATION_3D)
+add_definitions(-D_POSIX_C_SOURCE=200112L)
 
 set(CMAKE_BUILD_TYPE Debug)
 # set(CMAKE_BUILD_TYPE Release)

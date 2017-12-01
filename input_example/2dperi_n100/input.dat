@@ -4,9 +4,12 @@ step_len 0.05
 cf_bond 100.0
 cf_angle 40.0
 ; cf_angle 20.0
-total_steps 1000000
-observe_interval_mic 1000
-observe_interval_mac 100
+; total_steps 1000000
+; observe_interval_mic 1000
+; observe_interval_mac 100
+total_steps 10
+observe_interval_mic 1
+observe_interval_mac 1
 boundary_name periodic
 box_length.x 40.0
 box_length.y 40.0
