@@ -1,5 +1,7 @@
 #include "system.h"
 
+#include <stdlib.h>
+
 #include "topol.h"
 #include "evolver.h"
 #include "utils.h"
@@ -79,7 +81,12 @@ void readRestartConfig(System* self,
   append_char(fname, "/init_config.bin");
 
   int32_t n = 0;
-  FILE* fp = xfopen(string_to_char(fname), "r");
+  FILE* fp = fopen(string_to_char(fname), "r");
+  if (!fp) {
+    return;
+  } else {
+    fprintf(stderr, "Restart configuration is found.\n");
+  }
 
   size_t _;
   _ = fread(&n, sizeof(int32_t), 1, fp), (void) _;
@@ -87,10 +94,11 @@ void readRestartConfig(System* self,
   if (n != num_ptcls) {
     fprintf(stderr, "%d particles are read from init_confib.bin. However, %d is specified in input.dat\n",
             n, num_ptcls);
+    exit(EXIT_FAILURE);
   }
   _ = fread(pos, sizeof(dvec), n, fp), (void) _;
 
-  xfclose(fp);
+  fclose(fp);
   delete_string(fname);
 }
 

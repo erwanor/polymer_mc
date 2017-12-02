@@ -37,9 +37,9 @@ int main(const int argc, const char* argv[])
   }
 #endif
 
-  // readRestartConfig(system, param);
+  readRestartConfig(system, param);
   executeSimulation(system, boundary, param);
-  // writeFinalConfig(system, param);
+  writeFinalConfig(system, param);
 
   deleteSystem(system);
   deleteParameter(param);

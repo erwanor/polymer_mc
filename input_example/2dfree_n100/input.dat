@@ -7,7 +7,7 @@ cf_angle 0.0
 ;total_steps 1000000
 ;observe_interval_mic 1000
 ;observe_interval_mac 100
-total_steps 10
+total_steps 1
 observe_interval_mic 1
 observe_interval_mac 1
 boundary_name free
