@@ -166,6 +166,13 @@ long genrand_int31(MTstate* mtst)
   return (long)(genrand_int32(mtst)>>1);
 }
 
+long genrand_int31_range(MTstate* mtst,
+                         const long lo,
+                         const long hi)
+{
+  return (long)(genrand_int32(mtst)>>1) % (hi - lo + 1) + lo;
+}
+
 double genrand_real1(MTstate* mtst)
 {
   return genrand_int32(mtst)*(1.0/4294967295.0);

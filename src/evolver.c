@@ -93,13 +93,14 @@ static void mcStep(dvec* pos,
                    int32_t* num_accepted,
                    const ptclid2topol* id2top,
                    const Boundary* bound,
-                   const int32_t num_ptcl,
                    const double disp,
                    const double cf_bond,
                    const double cf_angle,
-                   const double l0)
+                   const double l0,
+                   const int32_t id_lo,
+                   const int32_t id_hi)
 {
-  const int32_t id_picked = genrand_int31(mtst) % num_ptcl;
+  const int32_t id_picked = genrand_int31_range(mtst, id_lo, id_hi);
   const dvec pos_tmp = pos[id_picked];
 
   const double e_locsum_bef = calcLocEnergy(pos, id_picked, id2top, bound, cf_bond, cf_angle, l0);
@@ -125,12 +126,20 @@ double evolveMc(System* system,
   const double cf_angle  = getCfAngle(param);
   const double l0        = getBondLen(param);
 
+  int32_t id_movable_lo = 0, id_movable_hi = num_ptcl - 1;
+  if (getBoundaryType(bound) == PERIODIC) {
+    id_movable_lo++;
+    id_movable_hi--;
+  }
+
   dvec* pos = getPos(system);
   ptclid2topol* id2top = getPtclId2Topol(system);
 
   int32_t num_accepted = 0;
   for (int32_t p = 0; p < num_ptcl; p++) {
-    mcStep(pos, mtst, &num_accepted, id2top, bound, num_ptcl, step_len, cf_bond, cf_angle, l0);
+    mcStep(pos, mtst, &num_accepted, id2top, bound,
+           step_len, cf_bond, cf_angle, l0,
+           id_movable_lo, id_movable_hi);
   }
 
   return (double)num_accepted / (double)num_ptcl;

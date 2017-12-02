@@ -22,6 +22,7 @@ void createStraightChain(System* system,
   dvec dr = { 0.0, 0.0, 0.0 };
   dr.x = len;
   clear_dvec(&pos[0]);
+  pos[0].x += 0.5 * dr.x;
   for (int32_t i = 1; i < num_ptcl; i++) {
     pos[i] = add_dvec_new(&pos[i - 1], &dr);
   }

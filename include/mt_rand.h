@@ -22,6 +22,8 @@ unsigned long genrand_int32(MTstate* mtst);
 /* generates a random number on [0,0x7fffffff]-interval */
 long genrand_int31(MTstate* mtst);
 
+long genrand_int31_range(MTstate* mtst, const long lo, const long hi);
+
 /* generates a random number on [0,1]-real-interval */
 double genrand_real1(MTstate* mtst);
 
