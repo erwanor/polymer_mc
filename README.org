@@ -1,4 +1,4 @@
-* Monte Carlo simulation code for polymer chains.
+* A Monte Carlo simulation code for polymer chains.
 ** How to compile 
 #+BEGIN_SRC bash
 $ mkdir build
