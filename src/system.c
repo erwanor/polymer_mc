@@ -130,6 +130,7 @@ void executeSimulation(System* self,
   init_genrand(mtst, getRandSeed(param));
 
   const int32_t tot_steps = getTotalSteps(param);
+  printf("tot_steps: %d\n", tot_steps);
   const int32_t observe_interval_mic = getObserveIntervalMic(param);
   const int32_t observe_interval_mac = getObserveIntervalMac(param);
   for (int32_t i = 0; i < tot_steps; i++) {

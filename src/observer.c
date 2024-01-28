@@ -369,7 +369,7 @@ static void observeTraject(Observer* self,
   const int32_t num_ptcl = getNumPtcl(param);
   writeXYZHeader(self->fps[TRAJECT], num_ptcl, mcsteps);
   for (int32_t i = 0; i < num_ptcl; i++) {
-    fprintf(self->fps[TRAJECT],
+    printf(
             "C %.15g %.15g %.15g\n", pos[i].x, pos[i].y, pos[i].z);
   }
   self->num_frames[TRAJECT]++;
