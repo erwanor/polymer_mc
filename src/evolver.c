@@ -151,7 +151,7 @@ double evolveMc(System *system,
 
       for (int32_t i = pivot + 1; i < num_ptcl; i++)
       {
-        printf ("rotate the particle %d around the axis (%f, %f, %f) by %f\n", i, axis[0], axis[1], axis[2], angle);
+        printf("rotate the particle %d around the axis (%f, %f, %f) by %f\n", i, axis[0], axis[1], axis[2], angle);
       }
     }
 
@@ -179,4 +179,28 @@ double evolveMc(System *system,
   }
 
   return (double)num_accepted / (double)num_ptcl;
+}
+
+// TODO(erwan): this seems directionally correct, but prob not quite right
+bool legalParticule(const dvec *pos, int32_t num_ptcl, const Boundary *bound)
+{
+  const double MIN_DISTANCE_MONOMER = 1.0; // really a placeholder for now
+
+  for (int32_t i = 0; i < num_ptcl - 1; i++)
+  {
+    for (int32_t j = i + 1; j < num_ptcl; j++)
+    {
+      // distance check
+    }
+  }
+
+  if (bound->type == PERIODIC)
+  {
+    for (int32_t i = 0; i < num_ptcl; i++)
+    {
+      // boundary check
+    }
+  }
+
+  return true;
 }
