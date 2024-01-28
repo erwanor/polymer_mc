@@ -11,6 +11,8 @@
 #include "topol.h"
 #include "utils.h"
 #include "interactions.h"
+#include "boundary.h"
+#include "vector3.h"
 
 static dvec kickParticle(const dvec *pos0,
                          const double disp,
@@ -190,17 +192,61 @@ bool legalParticule(const dvec *pos, int32_t num_ptcl, const Boundary *bound)
   {
     for (int32_t j = i + 1; j < num_ptcl; j++)
     {
-      // distance check
+      if (checkParticleOverlap(pos, num_ptcl, bound))
+      {
+        return false;
+      }
     }
   }
 
-  if (bound->type == PERIODIC)
+  if (bound == PERIODIC)
   {
     for (int32_t i = 0; i < num_ptcl; i++)
     {
-      // boundary check
+      if (!particuleBoundary(pos[i], bound))
+      {
+        return false;
+      }
     }
   }
 
   return true;
+}
+bool particuleBoundary(dvec point, const Boundary *bound)
+{
+  if (getBoundaryType(bound) == FREE)
+  {
+    return true;
+  }
+  else if (getBoundaryType(bound) == PERIODIC)
+  {
+    dvec boxLength;
+
+    return (point.x >= 0 && point.x <= boxLength.x &&
+            point.y >= 0 && point.y <= boxLength.y &&
+            point.z >= 0 && point.z <= boxLength.z);
+  }
+
+  return false;
+}
+double boundaryDistance(const dvec pos1, const dvec pos2, const Boundary *bound)
+{
+  return distance(&pos1, &pos2, bound); 
+}
+
+bool checkParticleOverlap(const dvec *pos, int32_t num_ptcl, const Boundary *bound)
+{
+  const double MIN_DISTANCE = 1.0; // this is a placeholder for now
+
+  for (int32_t i = 0; i < num_ptcl - 1; i++)
+  {
+    for (int32_t j = i + 1; j < num_ptcl; j++)
+    {
+      if (boundaryDistance(pos[i], pos[j], bound) < MIN_DISTANCE)
+      {
+        return true;
+      }
+    }
+  }
+  return false;
 }
